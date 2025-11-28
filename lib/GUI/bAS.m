@@ -303,8 +303,8 @@ for i=1:2:length(varargin)
 end
 
 % update the initials based on the mouse ID 17/01/10
-initials_ind = strfind(fileToLoad,'Current Mice')+length('Current Mice\');
-guiObjects.userData.initials = fileToLoad(initials_ind:initials_ind+1);
+% initials_ind = strfind(fileToLoad,'Current Mice')+length('Current Mice\');
+% guiObjects.userData.initials = fileToLoad(initials_ind:initials_ind+1);
 
 % save guiObjects
 set(guiObjects.figHandle,'UserData',guiObjects);

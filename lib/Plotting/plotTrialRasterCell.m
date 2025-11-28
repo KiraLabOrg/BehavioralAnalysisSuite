@@ -118,7 +118,7 @@ for i=1:size(dataCell,2)
     set(guiObjects.rasterHandle(i),'ButtonDownFcn',{@rasterClick_CALLBACK,...
         dataCell,i});
     rasterLocation(i) = ind/totTime;
-    set(guiObjects.rasterHandle(i),'Color',cmapCustom(dataCell{i}.maze.condition,:),'LineWidth',3);
+    set(guiObjects.rasterHandle(i),'Color',cmapCustom(dataCell{i}.maze.condition+1,:),'LineWidth',3);
 end
 xlim([0 1]);
 xTickVals = num2cell(timeVec(round(linspace(1,length(timeVec),11))));

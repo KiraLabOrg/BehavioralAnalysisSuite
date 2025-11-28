@@ -64,12 +64,12 @@ table.general.data(size(table.general.data,1)+1,1) = procData.nRewards;
 table.general.data(size(table.general.data,1)+1,1) = procData.percCorr;
 table.general.data(size(table.general.data,1)+1,1) = procData.percLeft;
 table.general.data(size(table.general.data,1)+1,1) = procData.fracLeft;
-table.general.data(size(table.general.data,1)+1,1) = procData.percWhite;
-table.general.data(size(table.general.data,1)+1,1) = procData.fracWhite;
+% table.general.data(size(table.general.data,1)+1,1) = procData.percWhite;
+table.general.data(size(table.general.data,1)+1,1) = procData.fracCat1;
 table.general.data(size(table.general.data,1)+1,1) = procData.nRewardsRec;
 table.general.data(size(table.general.data,1)+1,1) = procData.streak;
 table.general.names = {'nTrials','nRewards','Percent Correct','Percent Left Turns',...
-    'Percent Left Trials','Percent White Turns','Percent White Trials','nRewards Received',...
+    'Percent Left Trials','Percent Category1 Trials','nRewards Received',...
     'Streak'};
 
 %conditions

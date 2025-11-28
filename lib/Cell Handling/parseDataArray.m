@@ -10,7 +10,7 @@ function dataCell = parseDataArray(dataCell,data,exper)
 if isfield(exper.variables,'inITI_ind')
     inITI_ind = str2double(exper.variables.inITI_ind);
 else
-    inITI_ind = 9;
+    inITI_ind = size(data,1);
 end
 tStarts = [1 find(diff(data(inITI_ind,:)) == -1) + 1]; %find trial starts and add first column to account for first trial
 tStops = find(diff(data(inITI_ind,:)) == 1) + 1; %find trial stop
@@ -27,9 +27,9 @@ end
 
 %check to make sure nTrials in data array matches nTrials in dataCell
 if length(tStarts) > length(dataCell)
-    %     disp('nTrials in data array is greater than nTrials in dataCell');
-elseif length(tStarts) > length(dataCell)
-    error('nTrials in data array is less than nTrials in dataCell');
+    disp('nTrials in data array is greater than nTrials in dataCell');
+elseif length(tStarts) < length(dataCell)
+    disp('nTrials in data array is less than nTrials in dataCell');
 elseif length(tStarts) == length(dataCell) - 1
     dataCell = dataCell(1:end-1);
 end

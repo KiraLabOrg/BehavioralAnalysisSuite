@@ -96,9 +96,9 @@ procData.fracCorr = procData.nRewards/procData.nTrials;
 
 %calculate percent/fraction left/white
 procData.percLeft = 100*sum(findTrials(dataCell,'result.leftTurn==1'))/procData.nTrials;
-procData.percWhite = 100*sum(findTrials(dataCell,'result.whiteTurn==1'))/procData.nTrials;
+% procData.percWhite = 100*sum(findTrials(dataCell,'result.whiteTurn==1'))/procData.nTrials;
 procData.fracLeft = 100*sum(findTrials(dataCell,'maze.leftTrial==1'))/procData.nTrials;
-procData.fracWhite = 100*sum(findTrials(dataCell,'maze.whiteTrial==1'))/procData.nTrials;
+procData.fracCat1 = 100*sum(findTrials(dataCell,'maze.condition==1'))/procData.nTrials;
 
 %calculate mean+-std trial duration
 procData.meanTrialDur = mean(getCellVals(dataCell,'time.duration'));

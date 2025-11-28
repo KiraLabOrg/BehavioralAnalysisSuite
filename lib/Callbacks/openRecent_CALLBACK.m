@@ -12,18 +12,21 @@ origDir = cd(guiObjects.userData.path);
 animals = cell(1,length(guiObjects.userData.folders));
 numAn = 0;
 for i=1:length(guiObjects.userData.folders)
-    pathDir = cd(fullfile(guiObjects.userData.path,guiObjects.userData.folders{i})); %change to current/archived folder
-    
-    folderList = dir([guiObjects.userData.initials,'*']); %get list of animals (starting with user initials)
-    
-    %convert to cell
-    animals{i} = struct2cell(folderList); %convert structure to cell
-    animals{i} = animals{i}(1,:); %only take names
-    
-    %count animals
-    numAn = numAn + length(animals{i});
-    
-    cd(pathDir); %change back to path directory
+    dataDir = fullfile(guiObjects.userData.path,guiObjects.userData.folders{i});
+    if exist(dataDir,'dir');
+        pathDir = cd(fullfile(guiObjects.userData.path,guiObjects.userData.folders{i})); %change to current/archived folder
+        
+        folderList = dir([guiObjects.userData.initials,'*']); %get list of animals (starting with user initials)
+        
+        %convert to cell
+        animals{i} = struct2cell(folderList); %convert structure to cell
+        animals{i} = animals{i}(1,:); %only take names
+        
+        %count animals
+        numAn = numAn + length(animals{i});
+        
+        cd(pathDir); %change back to path directory
+    end
 end
 
 %generate tableData

@@ -17,7 +17,7 @@ elseif strfind(path,guiObjects.userData.folders{2}) ~= 0
     anPath = [guiObjects.userData.path,guiObjects.userData.folders{2}];
     loadedPath = 1;
 end
-origDir = cd(anPath);
+origDir = cd(fullfile(anPath,'Current Mice'));
 
 %get date from filenames
 if iscell(filenames)
