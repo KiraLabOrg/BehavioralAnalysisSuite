@@ -78,7 +78,10 @@ for i=1:length(dataCell)
                 winVars{j}{1},'(trialStart >= winData.startTimes & trialEnd <= stopTimes) =',...
                 winVars{j}{1},'(trialStart >= winData.startTimes & trialEnd <= stopTimes) + 1;',...
                 'end'];
-            eval(conditional);
+            try
+                eval(conditional);
+            catch
+            end
         end
     end
     
