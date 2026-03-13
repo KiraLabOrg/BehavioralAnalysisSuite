@@ -3,7 +3,8 @@ function print_CALLBACK(src,evnt,guiObjects)
     % configure the saving directory
     mouseID = guiObjects.figHandle.UserData.anName;
     CurrentMiceInd = strfind(guiObjects.userData.path,'\Current Mice');
-    figpath = [guiObjects.userData.path(1:CurrentMiceInd),'BASfigs\',mouseID,'\'];
+    figpath = [guiObjects.userData.path,'BASfigs\',mouseID,'\'];
+    % figpath = [guiObjects.userData.path(1:CurrentMiceInd),'BASfigs\',mouseID,'\'];
 
     % configure the saving file name
     if isfield(guiObjects.animalPopup.UserData,'fileCell') % loaded data
