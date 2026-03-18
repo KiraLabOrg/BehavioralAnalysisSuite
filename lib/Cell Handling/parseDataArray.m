@@ -9,6 +9,8 @@ function dataCell = parseDataArray(dataCell,data,exper)
 
 if isfield(exper.variables,'inITI_ind')
     inITI_ind = str2double(exper.variables.inITI_ind);
+elseif strcmp(exper.name,'Paired2TowersSK')
+    inITI_ind = 9;
 else
     inITI_ind = size(data,1);
 end
