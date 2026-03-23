@@ -1,0 +1,188 @@
+%This file provides the user data for the Behavior Analysis Suite. Any 
+%new user to the suite will have to first modify this file with information 
+%necessary for the software to run. This file is divided into several sections
+%as highlighted by '%' comment indicators (as in Matlab). Underneath each 
+%section is a space for user input. Please insert user strings in these spaces,
+%using the delimeters designated by the comments above each section. The software
+%will only read elements in this file on lines which do not start with %.
+%
+%ASM 9/26/12
+%
+%SECTION I: User Path
+%Below this comment, input the path of stored data. This should be 
+%the path before any subdivision to current or archived and should be the 
+%location of your temporary directory for online processing. 
+%Ex. C:\Data\Ari\
+%
+Z:\
+%
+%
+%SECTION 2: User initials
+%Below this comment, input the two letter initials with which files begin.
+%Ex. AM
+%
+KL
+%
+%
+%SECTION 3: Temporary Storage Name
+%Below this comment, input the base name of the temporary storage files. 
+%Note that there must be three of these files - one should be a dat file, 
+%one should be a mat file, and the third should be an additional mat file 
+%with Cell appended to the end (tempStorageCell.mat). This likely won't need
+%to be changed. 
+%Ex. tempStorage
+%
+tempStorage
+%
+%
+%SECTION 4: Temporary Path
+%Below this comment, input the path of the temporary folder. Note this should 
+%be a path to a shared folder on the virmen/behavior computer. 
+%Ex. \\HARVEYRIG1\Temporary
+%
+C:\Users\kiralab\Documents\MATLAB\Temporary
+%
+%
+%SECTION 5: Current or Archived Mice
+%Below this comment, input the two folder names for current/archived mice on 
+%separate lines. The first folder should correspond to currently used animals
+%while the second folder should correspond to archived animals. 
+%DO NOT REMOVE THE 'END' STRING AT THE END OF THIS SECTION
+%Ex. Current Mice
+%Ex. Archived Mice
+%
+Current Mice
+Archived Mice
+END
+%
+%
+%SECTION 6: Sliding Window Flags
+%Below this comment, input each flag which you will use separated by new lines. 
+%These flags should be conditions which can be fed into an if statement to 
+%specify whether or not to tabulate specific variables as designated in the 
+%next section. DO NOT REMOVE THE 'END' STRING AT THE END OF THIS SECTION
+%Ex. isfield(dataCell{1}.maze,'tower')
+%In this example, the conditinal flag is that the field tower must exist in 
+%the first cell of the data. 
+%
+isfield(dataCell{1}.maze,'twoTowers')
+isfield(dataCell{1}.maze,'delay')
+isfield(dataCell{1}.maze,'crutchTrial')
+END
+%
+%
+%SECTION 7: Sliding Window Variables (Not percentages)
+%Below this comment, input each variable to be tabulated in the sliding window,
+%not counting trials and rewards which are built in. In each line, separate the
+%arguments using the delimiter, '|', with each variable to on a different line.
+%For each variable, the first argument should be the name of the variable,
+%starting with 'winData.'. The second argument should be whether or not a flag
+%applies to the variable. If no flag applies, this argument should be 0. If
+%a flag does apply, this argument should be the number of the flag. The 
+%remaining arguments (there is a limit of 10) should be cell specifiers in the format
+%'result.correct == 1'. These will be combined to generate the variable. 
+%DO NOT REMOVE THE 'END' STRING AT THE END OF THIS SECTION
+%
+%Ex. winData.leftTurns2Towers|1|result.leftTurn==1|maze.twoTowers == 0
+%In this example, the variable winData.leftTurns2Towers is created, the first
+%flag applies to it, and it will tabulate all trials in which the mouse turned 
+%left, as described by result.leftTurn==1, and in which there was no tower,
+%as described by maze.twoTowers == 0. 
+%
+winData.leftTurns|0|result.leftTurn==1
+winData.whiteTurns|0|result.whiteTurn==1
+winData.leftTrials|0|maze.leftTrial==1
+winData.whiteTrials|0|maze.whiteTrial==1
+winData.nTrials1Tower|1|true|maze.twoTowers == 0
+winData.nRewards1Tower|1|result.correct==1|maze.twoTowers == 0
+winData.leftTurns1Tower|1|result.leftTurn==1|maze.twoTowers == 0
+winData.whiteTurns1Tower|1|result.whiteTurn==1|maze.twoTowers == 0
+winData.leftTrials1Tower|1|maze.leftTrial==1|maze.twoTowers == 0
+winData.whiteTrials1Tower|1|maze.leftTrial==1|maze.twoTowers == 0
+winData.nTrials2Towers|1|true|maze.twoTowers == 1
+winData.nRewards2Towers|1|result.correct==1|maze.twoTowers == 1
+winData.leftTurns2Towers|1|result.leftTurn==1|maze.twoTowers == 1
+winData.whiteTurns2Towers|1|result.whiteTurn==1|maze.twoTowers == 1
+winData.leftTrials2Towers|1|maze.leftTrial==1|maze.twoTowers == 1
+winData.whiteTrials2Towers|1|maze.leftTrial==1|maze.twoTowers == 1
+winData.nTrialsNoDelay|2|true|maze.delay == 0
+winData.nRewardsNoDelay|2|result.correct==1|maze.delay == 0
+winData.leftTurnsNoDelay|2|result.leftTurn==1|maze.delay == 0
+winData.whiteTurnsNoDelay|2|result.whiteTurn==1|maze.delay == 0
+winData.leftTrialsNoDelay|2|maze.leftTrial==1|maze.delay == 0
+winData.whiteTrialsNoDelay|2|maze.leftTrial==1|maze.delay == 0
+winData.nTrialsDelay|2|true|maze.delay == 1
+winData.nRewardsDelay|2|result.correct==1|maze.delay == 1
+winData.leftTurnsDelay|2|result.leftTurn==1|maze.delay == 1
+winData.whiteTurnsDelay|2|result.whiteTurn==1|maze.delay == 1
+winData.leftTrialsDelay|2|maze.leftTrial==1|maze.delay == 1
+winData.whiteTrialsDelay|2|maze.leftTrial==1|maze.delay == 1
+winData.nTrialsDelay|3|true|maze.crutchTrial == 0
+winData.nRewardsDelay|3|result.correct==1|maze.crutchTrial == 0
+winData.leftTurnsDelay|3|result.leftTurn==1|maze.crutchTrial == 0
+winData.whiteTurnsDelay|3|result.whiteTurn==1|maze.crutchTrial == 0
+winData.leftTrialsDelay|3|maze.leftTrial==1|maze.crutchTrial == 0
+winData.whiteTrialsDelay|3|maze.whiteTrial==1|maze.crutchTrial == 0
+winData.nTrialsCrutch|3|true|maze.crutchTrial == 1
+winData.nRewardsCrutch|3|result.correct==1|maze.crutchTrial == 1
+winData.leftTurnsCrutch|3|result.leftTurn==1|maze.crutchTrial == 1
+winData.whiteTurnsCrutch|3|result.whiteTurn==1|maze.crutchTrial == 1
+winData.leftTrialsCrutch|3|maze.leftTrial==1|maze.crutchTrial == 1
+winData.whiteTrialsCrutch|3|maze.whiteTrial==1|maze.crutchTrial == 1
+END
+%
+%
+%SECTION 8: Percentage Calculations for Sliding Window
+%Below this comment, input the percentage calculations. 
+%The first argument should be the display name of the 
+%variable in the GUI. The second argument should be the flag number as in
+% section 7 (0 if no flag applied, otherwise
+%the number of the flag).The third argument should be the name of the 
+%percentage variable, starting with 'winData.' The fourth argument should be
+%the numerator, and the fifth the denominator. These should be separated by the 
+%'|' delimiter, with each separate calculation on a new line. Note that 
+%variables in the numerator and denominator MUST be defined in section 7 above,
+%UNLESS they are winData.nTrials, which represents the total number of trials 
+%in the window, or winData.nRewards, which represents the total number of 
+%rewards within the window. These two variables are predefined by the software
+%The standard percent correct (rewards/trials) calculation is built in.
+%DO NOT REMOVE THE 'END' STRING AT THE END OF THIS SECTION.
+%
+%Ex. 0|winData.percLeft|winData.leftTurns|winData.nTrials
+%
+Left Turns|0|winData.percLeft|winData.leftTurns|winData.nTrials
+Left Trials|0|winData.fracLeft|winData.leftTrials|winData.nTrials
+White Turns|0|winData.percWhite|winData.whiteTurns|winData.nTrials
+White Trials|0|winData.fracWhite|winData.whiteTrials|winData.nTrials
+Correct 1 Tower|1|winData.percCorrTower|winData.nRewards1Tower|winData.nTrials1Tower
+Left Turns 1 Tower|1|winData.percLeftTower|winData.leftTurns1Tower|winData.nTrials1Tower
+Left Trials 1 Tower|1|winData.fracLeftTower|winData.leftTrials1Tower|winData.nTrials1Tower
+White Turns 1 Tower|1|winData.percWhiteTower|winData.whiteTurns1Tower|winData.nTrials1Tower
+White Trials 1 Tower|1|winData.fracWhiteTower|winData.whiteTrials1Tower|winData.nTrials1Tower
+Correct 2 Towers|1|winData.percCorr2Towers|winData.nRewards2Towers|winData.nTrials2Towers
+Left Turns 2 Towers|1|winData.percLeft2Towers|winData.leftTurns2Towers|winData.nTrials2Towers
+Left Trials 2 Towers|1|winData.fracLeft2Towers|winData.leftTrials2Towers|winData.nTrials2Towers
+White Turns 2 Towers|1|winData.percWhite2Towers|winData.whiteTurns2Towers|winData.nTrials2Towers
+White Trials 2 Towers|1|winData.fracWhite2Towers|winData.whiteTrials2Towers|winData.nTrials2Towers
+Correct No Delay|2|winData.percCorrNoDelay|winData.nRewardsNoDelay|winData.nTrialsNoDelay
+Left Turns No Delay|2|winData.percLeftNoDelay|winData.leftTurnsNoDelay|winData.nTrialsNoDelay
+Left Trials No Delay|2|winData.fracLeftNoDelay|winData.leftTrialsNoDelay|winData.nTrialsNoDelay
+White Turns No Delay|2|winData.percWhiteNoDelay|winData.whiteTurnsNoDelay|winData.nTrialsNoDelay
+White Trials No Delay|2|winData.fracWhiteNoDelay|winData.whiteTrialsNoDelay|winData.nTrialsNoDelay
+Correct Delay|2|winData.percCorrDelay|winData.nRewardsDelay|winData.nTrialsDelay
+Left Turns Delay|2|winData.percLeftDelay|winData.leftTurnsDelay|winData.nTrialsDelay
+Left Trials Delay|2|winData.fracLeftDelay|winData.leftTrialsDelay|winData.nTrialsDelay
+White Turns Delay|2|winData.percWhiteDelay|winData.whiteTurnsDelay|winData.nTrialsDelay
+White Trials Delay|2|winData.fracWhiteDelay|winData.whiteTrialsDelay|winData.nTrialsDelay
+Correct Delay|3|winData.percCorrDelay|winData.nRewardsDelay|winData.nTrialsDelay
+Left Turns Delay|3|winData.percLeftDelay|winData.leftTurnsDelay|winData.nTrialsDelay
+Left Trials Delay|3|winData.fracLeftDelay|winData.leftTrialsDelay|winData.nTrialsDelay
+White Turns Delay|3|winData.percWhiteDelay|winData.whiteTurnsDelay|winData.nTrialsDelay
+White Trials Delay|3|winData.fracWhiteDelay|winData.whiteTrialsDelay|winData.nTrialsDelay
+Correct Crutch|3|winData.percCorrCrutch|winData.nRewardsCrutch|winData.nTrialsCrutch
+Left Turns Crutch|3|winData.percLeftCrutch|winData.leftTurnsCrutch|winData.nTrialsCrutch
+Left Trials Crutch|3|winData.fracLeftCrutch|winData.leftTrialsCrutch|winData.nTrialsCrutch
+White Turns Crutch|3|winData.percWhiteCrutch|winData.whiteTurnsCrutch|winData.nTrialsCrutch
+White Trials Crutch|3|winData.fracWhiteCrutch|winData.whiteTrialsCrutch|winData.nTrialsCrutch
+END
+%
