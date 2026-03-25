@@ -24,7 +24,7 @@ function print_CALLBACK(src,evnt,guiObjects)
     end
     
     fig_date = fig_name(7:12);
-    figpath2 = [guiObjects.userData.path(1:CurrentMiceInd),'BASfigs\Daily\',fig_date,'\'];
+    figpath2 = [guiObjects.userData.path,'BASfigs\Daily\',fig_date,'\'];
     
     if ~exist(figpath,'dir')
         mkdir(figpath);
