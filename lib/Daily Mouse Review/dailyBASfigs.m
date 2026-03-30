@@ -1,14 +1,14 @@
 function dailyBASfigs(varargin)
 
 % default params
-userFile = 'userData_SK_Rig_5_ViRMEn.txt';
-mouse_list = 47:74;
+userFile = 'userData_KL_Rig_3_ViRMEn.txt';
+mouse_list = 1:12;
 % mydate = datestr(now,'yymmdd');
 % mydate = num2str(str2double(mydate)-1);
 
 for mi = mouse_list
     
-    initials = getInitials(mi);  
+    initials = getInitialsKL(mi);  
     if nargin==0
         mydate = datestr(now,'yymmdd');
     else
@@ -16,7 +16,7 @@ for mi = mouse_list
     end
     
     mouseID = sprintf('%s%03d',initials,mi);
-    folder_name = sprintf('Z:\\HarveyLab\\Tier1\\Shin\\ShinDataAll\\Current Mice\\%s\\',mouseID);
+    folder_name = sprintf('Z:\\Current Mice\\%s\\',mouseID);
     file_list = dir(fullfile(folder_name,sprintf('*%s_Cell*.mat',mydate)));
     CurrentMiceInd = strfind(folder_name,'\Current Mice');
     figpath = [folder_name(1:CurrentMiceInd),'BASfigs\',mouseID,'\'];
