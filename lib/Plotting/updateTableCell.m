@@ -9,13 +9,13 @@ values = get(guiObjects.tableList,'Value');
 for i=1:length(table)
    tableData{i} = table{i}.sessionTime.data;
     rowNames = table{i}.sessionTime.names;
-    if ismember(1,values) %special
-        tableData{i} = cat(1,tableData{i},num2cell(table{i}.special.data));
-        rowNames = cat(2,rowNames,table{i}.special.names);
-    end
     if ismember(2,values) %general
         tableData{i} = cat(1,tableData{i},num2cell(table{i}.general.data));
         rowNames = cat(2,rowNames,table{i}.general.names);
+    end
+    if ismember(1,values) %special
+        tableData{i} = cat(1,tableData{i},num2cell(table{i}.special.data));
+        rowNames = cat(2,rowNames,table{i}.special.names);
     end
     if ismember(3,values) %conditions
         tableData{i} = cat(1,tableData{i},num2cell(table{i}.conditions.data));
