@@ -59,18 +59,13 @@ table.special.names = {};
 
 %MODIFY THE SECTIONS BELOW
 %general
-table.general.data(size(table.general.data,1)+1,1) = procData.nTrials;
 table.general.data(size(table.general.data,1)+1,1) = procData.nRewards;
+table.general.data(size(table.general.data,1)+1,1) = procData.nTrials;
 table.general.data(size(table.general.data,1)+1,1) = procData.percCorr;
 table.general.data(size(table.general.data,1)+1,1) = procData.percLeft;
-table.general.data(size(table.general.data,1)+1,1) = procData.fracLeft;
-% table.general.data(size(table.general.data,1)+1,1) = procData.percWhite;
-table.general.data(size(table.general.data,1)+1,1) = procData.fracCat1;
-table.general.data(size(table.general.data,1)+1,1) = procData.nRewardsRec;
-table.general.data(size(table.general.data,1)+1,1) = procData.streak;
-table.general.names = {'nTrials','nRewards','Percent Correct','Percent Left Turns',...
-    'Percent Left Trials','Percent Category1 Trials','nRewards Received',...
-    'Streak'};
+table.general.data(size(table.general.data,1)+1,1) = procData.catData.percCat0Trials;
+table.general.names = {'nRewards','nTrials','Percent Correct','Percent Left Turns',...
+    'Percent Cat0 Trials'};
 
 %conditions
 numConds = length(procData.nTrialsConds);
@@ -93,6 +88,23 @@ table.timing.names = {'Trials Per Minute','Rewards Per Minute','Mean Trial Durat
     'STD of Trial Duration'};
     
 %special
+if isfield(procData,'catData')
+    table.special.data(end+1,1) = procData.catData.crutch.nCorrect;
+    table.special.data(end+1,1) = procData.catData.crutch.nTrials;
+    table.special.data(end+1,1) = procData.catData.crutch.percCorrect;
+
+    table.special.data(end+1,1) = procData.catData.noCrutch.nCorrect;
+    table.special.data(end+1,1) = procData.catData.noCrutch.nTrials;
+    table.special.data(end+1,1) = procData.catData.noCrutch.percCorrect;
+
+    table.special.data(end+1,1) = procData.streak;
+
+    table.special.names = [table.special.names, ...
+        {'nRewards Crutch', 'nTrials Crutch', 'Percent Correct Crutch', ...
+         'nRewards NoCrut', 'nTrials NoCrut', 'Percent Correct NoCrut', ...
+         'Streak'}];
+end
+
 if isfield(procData,'pairedData') %paired
     table.special.data(size(table.special.data,1)+1,1) = procData.pairedData.percCorrTower;
     table.special.data(size(table.special.data,1)+1,1) = procData.pairedData.nTrialsTower;
