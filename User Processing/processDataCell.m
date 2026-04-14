@@ -108,6 +108,11 @@ procData.stdTrialDur = std(getCellVals(dataCell,'time.duration'));
 procData.trialsPerMin = procData.nTrials/procData.sessionTime;
 procData.rewPerMin = procData.nRewards/procData.sessionTime;
 
+%process category
+if ~isempty(dataCell) && isfield(dataCell{1}.maze,'category')
+    procData.catData = processCatCell(dataCell);
+end
+
 %process paired 
 if ~isempty(dataCell) && isfield(dataCell{1}.maze,'twoTowers')
     procData.pairedData = processPairedCell(dataCell);
