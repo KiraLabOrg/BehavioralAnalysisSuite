@@ -63,9 +63,7 @@ table.general.data(size(table.general.data,1)+1,1) = procData.nRewards;
 table.general.data(size(table.general.data,1)+1,1) = procData.nTrials;
 table.general.data(size(table.general.data,1)+1,1) = procData.percCorr;
 table.general.data(size(table.general.data,1)+1,1) = procData.percLeft;
-table.general.data(size(table.general.data,1)+1,1) = procData.catData.percCat0Trials;
-table.general.names = {'nRewards','nTrials','Percent Correct','Percent Left Turns',...
-    'Percent Cat0 Trials'};
+table.general.names = {'nRewards','nTrials','Percent Correct','Percent Left Turns'};
 
 %conditions
 numConds = length(procData.nTrialsConds);
@@ -89,6 +87,7 @@ table.timing.names = {'Trials Per Minute','Rewards Per Minute','Mean Trial Durat
     
 %special
 if isfield(procData,'catData')
+    table.general.data(size(table.general.data,1)+1,1) = procData.catData.percCat0Trials;
     table.special.data(end+1,1) = procData.catData.crutch.nCorrect;
     table.special.data(end+1,1) = procData.catData.crutch.nTrials;
     table.special.data(end+1,1) = procData.catData.crutch.percCorrect;
