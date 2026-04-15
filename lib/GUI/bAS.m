@@ -27,7 +27,7 @@ end
 guiObjects.figHandle = figure('Name','Behavioral Analysis Suite v1.0','NumberTitle','Off','MenuBar','none');
 set(guiObjects.figHandle,'OuterPosition',[scrn(1)+0.3*scrn(3) scrn(2) 0.7*scrn(3) 0.75*scrn(4)]);
 
-guiObjects.table = uitable('FontName','Arial','FontSize',12,'RowStriping','on','BackgroundColor',...
+guiObjects.table = uitable('FontName','Arial','FontSize',10,'RowStriping','on','BackgroundColor',...
     [1 1 1; 0.8 0.8 0.8],'Units','normalized','Position',[0 .32 1 .28]);
 
 %create start live acquisition button
