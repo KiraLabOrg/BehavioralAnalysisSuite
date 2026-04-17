@@ -48,7 +48,7 @@ end
 
 if addFile
     if ~iscell(filenames)
-        filenames = {filenames};f
+        filenames = {filenames};
     end
     info = get(guiObjects.openSelected,'UserData');
     filepath = {filepath};
@@ -81,6 +81,7 @@ if iscell(filenames)%check if multiple files
         matFileName = regexp(filenames{i},'_Cell','split'); %create string for other mat file
         matFileName = [matFileName{1} matFileName{2}];
         load(matFileName); %load mat file
+        % vr = load(...)
         if exist('exper')
             virmenFlag(i) = true;
         end
