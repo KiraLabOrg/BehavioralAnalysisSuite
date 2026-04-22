@@ -139,8 +139,13 @@ end
 % process twoFac
 if ~isempty(dataCell) && isfield(dataCell{1}.maze,'twoFac') && ~isfield(dataCell{1}.maze,'delayLength')
     if ~multiData && size(data,1) >= 10
-        procData.twoFac = data(10,end);
-        procData.twoFacAll = data(10,:);
+        if isfield(dataCell{1}.maze,'category')
+            twoFac_ind = 11;
+        else
+            twoFac_ind = 10;
+        end
+        procData.twoFac = data(twoFac_ind,end);
+        procData.twoFacAll = data(twoFac_ind,:);
     end
 end
 
