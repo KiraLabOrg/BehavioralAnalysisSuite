@@ -27,7 +27,7 @@ tStops = find(diff(data(inITI_ind,:)) == 1) + 1; %find trial stop
 if length(tStarts) > length(tStops) %if more starts than stops
     tStarts = tStarts(1:end-1);
     if length(tStarts) > length(tStops)
-        error('Multiple incomplete trials');
+        warning('Multiple incomplete trials');
     end
 elseif length(tStarts) < length(tStops)
     error('Trial starts missing');
