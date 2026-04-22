@@ -182,7 +182,8 @@ end
     % added by SK 04/23/15
 if isfield(procData,'twoFac')
     table.special.data(size(table.special.data,1)+1,1) = procData.twoFac;
-    table.special.names = {'twoFac'};
+    % table.special.names = {'twoFac'};
+    table.special.names = [table.special.names, {'twoFac'}];
 end
     
     % Added by VS 02/15/17
