@@ -18,7 +18,9 @@ cd(origDir);
 
 screens = get(0,'MonitorPositions');
 if size(screens,1) > 1
-    scrn = screens(1,:);
+    [~, scrn_ind] = min(screens(:,1));
+    scrn = screens(scrn_ind,:);
+    % scrn = screens(1,:);
     % scrn = screens(2,:);
 else
     scrn = screens(1,:);
