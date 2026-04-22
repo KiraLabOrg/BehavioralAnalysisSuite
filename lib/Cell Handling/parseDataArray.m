@@ -8,9 +8,15 @@ function dataCell = parseDataArray(dataCell,data,exper)
 %get trial start and stop indices
 
 if isfield(exper.variables,'inITI_ind')
-    inITI_ind = str2double(exper.variables.inITI_ind);
+    if ischar(exper.variables.inITI_ind)
+        inITI_ind = str2double(exper.variables.inITI_ind);
+    else
+        inITI_ind = exper.variables.inITI_ind;
+    end
 elseif strcmp(exper.name,'Paired2TowersSK')
     inITI_ind = 9;
+elseif contains(exper.name,'MoveTower')
+    inITI_ind = 10;
 else
     inITI_ind = size(data,1);
 end
