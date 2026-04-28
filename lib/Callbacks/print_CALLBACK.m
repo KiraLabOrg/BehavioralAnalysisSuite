@@ -9,8 +9,10 @@ function print_CALLBACK(src,evnt,guiObjects)
     % configure the saving file name
     if isfield(guiObjects.animalPopup.UserData,'fileCell') % loaded data
         loadedFileName = guiObjects.animalPopup.UserData.fileCell{guiObjects.animalPopup.UserData.loadedFile};
-        CellInd = strfind(loadedFileName,'_Cell');
-        fig_name = loadedFileName(1:CellInd-1);
+        % CellInd = strfind(loadedFileName,'_Cell');
+        % fig_name = loadedFileName(1:CellInd-1);
+        fig_name = strrep(loadedFileName, '_Cell', '');
+        fig_name = strrep(fig_name, '.mat', '');
     else % live data
         mouseID = guiObjects.figHandle.UserData.anName;
         fig_name = [mouseID,'_',guiObjects.figHandle.UserData.dateName];
