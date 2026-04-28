@@ -14,7 +14,7 @@
 %location of your temporary directory for online processing. 
 %Ex. C:\Data\Ari\
 %
-C:\Users\kiralab\Documents\MATLAB\VirmenData\
+\\psy-chaos\kiralab\Lab\
 %
 %
 %SECTION 2: User initials
