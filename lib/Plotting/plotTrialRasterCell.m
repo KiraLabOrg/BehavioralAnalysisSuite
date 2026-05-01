@@ -36,10 +36,15 @@ if ~isempty(dataCell)
         nConds = length(unique(getCellVals(dataCell,'maze.condition')));
     end
     cmapCustom = blackGreyColor(round(linspace(1,size(blackGreyColor,1),...
-        nConds)),:); %#ok<NODEF> %set colormap 
+        nConds)),:); %#ok<NODEF> %set colormap
 else
     cmapCustom = blackGreyColor(round(linspace(1,size(blackGreyColor,1),4)),:);
 end
+if 1
+    % Changing conditions 4 to a more distict color (purple) 26/05/01
+    cmapCustom(4,:) = [152,78,163]./255;
+end
+
 %plot overlaid variables
 guiObjects = plotDelayLength(procData,totTime,guiObjects);
 guiObjects = plotGreyFac(procData,totTime,guiObjects);
@@ -50,6 +55,7 @@ guiObjects.rasterHandle = zeros(size(dataCell));
 guiObjects.shadeHandle = zeros(size(dataCell));
 guiObjects.shadeHandle2 = zeros(size(dataCell));
 rasterLocation = zeros(size(dataCell));
+crutch_exist = isfield(dataCell{1}.maze,'crutchTrial');
 yBounds = get(gca,'ylim');
 newCellFlag = false;
 for i=1:size(dataCell,2)
@@ -123,7 +129,12 @@ for i=1:size(dataCell,2)
     else
         offset = 1;
     end
-    set(guiObjects.rasterHandle(i),'Color',cmapCustom(dataCell{i}.maze.condition+offset,:),'LineWidth',3);
+    if crutch_exist
+        color_ind = dataCell{i}.maze.condition + 2*(1-dataCell{i}.maze.crutchTrial)+ offset;
+    else
+        color_ind = dataCell{i}.maze.condition + offset;
+    end
+    set(guiObjects.rasterHandle(i),'Color',cmapCustom(color_ind,:),'LineWidth',3);
 end
 xlim([0 1]);
 xTickVals = num2cell(timeVec(round(linspace(1,length(timeVec),11))));
