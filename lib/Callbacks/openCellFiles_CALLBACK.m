@@ -380,6 +380,11 @@ if online
     else
         set(guiObjects.condDisp(2),'String',dataCell{end}.maze.condition);
         % set(guiObjects.condDisp(2),'String',conds{data(7,end)});
+        
+        %set strings
+        set(guiObjects.animalPopup,'String',anName,'Value',1);
+        set(guiObjects.datePopup,'String',char(datetime('today','Format','yyMMdd')),'Value',1);
+        % set(guiObjects.mouseToggle,'Value',loadedPath);
     end
 end
 
