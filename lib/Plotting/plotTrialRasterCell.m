@@ -56,6 +56,12 @@ guiObjects.shadeHandle = zeros(size(dataCell));
 guiObjects.shadeHandle2 = zeros(size(dataCell));
 rasterLocation = zeros(size(dataCell));
 crutch_exist = isfield(dataCell{1}.maze,'crutchTrial');
+familiar_exist = isfield(dataCell{1},'visStim') && isfield(dataCell{1}.visStim,'isFamiliar');  % isFamiliar lives in visStim sub-struct
+% mouseInFamiliarExp: true only when procData carries familiarFac
+% (set by processDataCell.m solely for mice listed in TmazeMoveTowerVisGuide line 46)
+mouseInFamiliarExp = familiar_exist && isfield(procData,'familiarFac');
+novelColorL = [252/255   0/255 213/255];  % #FC00D5 hot magenta – L Novel
+novelColorR = [  0/255  16/255 255/255];  % #0010FF electric blue – R Novel
 yBounds = get(gca,'ylim');
 newCellFlag = false;
 for i=1:size(dataCell,2)
@@ -102,11 +108,11 @@ for i=1:size(dataCell,2)
     if dataCell{i}.result.correct
         guiObjects.shadeHandle(i) = patch([halfInd(1) halfInd(2) halfInd(2) halfInd(1)],...
             [yBounds(2) yBounds(2) yBounds(1)+0.8*(yBounds(2)-yBounds(1)) yBounds(1)+0.8*(yBounds(2)-yBounds(1))],...
-            [0.18 0.8 0.44],'EdgeColor','none');
+            [0/255 255/255 51/255],'EdgeColor','none');   % #00FF33 correct
     else
         guiObjects.shadeHandle(i) = patch([halfInd(1) halfInd(2) halfInd(2) halfInd(1)],...
             [yBounds(2) yBounds(2) yBounds(1)+0.8*(yBounds(2)-yBounds(1)) yBounds(1)+0.8*(yBounds(2)-yBounds(1))],...
-            [0.9 0.36 0.36],'EdgeColor','none');
+            [255/255 0/255 0/255],'EdgeColor','none');    % #FF0000 incorrect
     end
     % stim/non-stim indicator
     if isfield(dataCell{i},'stim')
@@ -135,6 +141,19 @@ for i=1:size(dataCell,2)
         color_ind = dataCell{i}.maze.condition + offset;
     end
     set(guiObjects.rasterHandle(i),'Color',cmapCustom(color_ind,:),'LineWidth',3);
+    % Novel trial: override tick colour with yellow shades.
+    % Guard: trial must have isFamiliar saved AND the handle must be a real graphics object.
+    if mouseInFamiliarExp && ...
+       isfield(dataCell{i},'visStim') && isfield(dataCell{i}.visStim,'isFamiliar') && ...
+       ishandle(guiObjects.rasterHandle(i)) && guiObjects.rasterHandle(i) ~= 0
+        if ~dataCell{i}.visStim.isFamiliar
+            if dataCell{i}.maze.leftTrial
+                set(guiObjects.rasterHandle(i),'Color',novelColorL,'LineWidth',3);
+            else
+                set(guiObjects.rasterHandle(i),'Color',novelColorR,'LineWidth',3);
+            end
+        end
+    end
 end
 xlim([0 1]);
 xTickVals = num2cell(timeVec(round(linspace(1,length(timeVec),11))));
@@ -151,10 +170,31 @@ end
 guiObjects.trialCondLegend = subplot('Position',[0.02 0.6025 0.9 0.0175]);
 set(gca,'visible','off');
 xlim([0 1]);
+% Labels for the 4 existing crutch/noncrutch bars (TeX subscripts)
+legLabels = {'L Crutch', 'R Crutch', 'L NoCrut', 'R NoCrut'};
 for i = 1:size(cmapCustom,1)
     line([i/24 i/24],[0 1],'Color',cmapCustom(i,:),'LineWidth',3);
-    text(.0417*i+.01,.5,num2str(i),'Color',cmapCustom(i,:),'HorizontalAlignment','Left');
+    if i <= length(legLabels)
+        text(.0417*i+.01,.5,legLabels{i},'Color',cmapCustom(i,:),...
+            'HorizontalAlignment','Left','FontSize',7);
+    else
+        text(.0417*i+.01,.5,num2str(i),'Color',cmapCustom(i,:),'HorizontalAlignment','Left');
+    end
 end
+
+% Novel legend entries – shown only when mouse is in the familiar/novel experiment
+if mouseInFamiliarExp
+    nBase = size(cmapCustom,1);
+    novCols   = {novelColorL, novelColorR};
+    novLabels = {'L Novel', 'R Novel'};
+    for ni = 1:2
+        xi = nBase + ni;
+        line([xi/24 xi/24],[0 1],'Color',novCols{ni},'LineWidth',3);
+        text(.0417*xi+.01,.5,novLabels{ni},'Color',novCols{ni},...
+            'HorizontalAlignment','Left','FontSize',7);
+    end
+end
+
 
 set(guiObjects.trialRaster,'UserData',timeVec);
 set(guiObjects.trialRaster,'ButtonDownFcn',{@rasterAxesClick_CALLBACK,...

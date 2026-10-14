@@ -187,3 +187,183 @@ if ~isempty(dataCell) && isfield(dataCell{1}.maze,'mazeLength')
     end
 end
 
+% Parse giveRewardKL.m to find uL per reward for this mouse.
+% First checks all explicit ismember(vr.mouseNum,[...]) blocks.
+% If the mouse is in the else/default branch, falls back to the consensus
+% else-block value across all standard rigs (rigs 1-3 all default to 7 uL).
+if ~isempty(dataCell)
+    mouseNum_rew = dataCell{1}.info.mouse;
+    procData.ulPerRew = NaN;
+    rewardFile = which('giveRewardKL');
+    if ~isempty(rewardFile)
+        fid = fopen(rewardFile,'r');
+        if fid > 0
+            rewLines = {};
+            tline = fgetl(fid);
+            while ischar(tline)
+                rewLines{end+1} = tline; %#ok<AGROW>
+                tline = fgetl(fid);
+            end
+            fclose(fid);
+            elseUL      = [];   % default uL values from else blocks (fallback)
+            inElse      = false;
+            for li = 1:length(rewLines)
+                ln = rewLines{li};
+                % --- explicit ismember match ---
+                if ~isempty(regexp(ln,'ismember.*mouseNum','once'))
+                    inElse = false;
+                    miceToken = regexp(ln,'\[([^\]]*)\]','tokens','once');
+                    if ~isempty(miceToken) && ~isempty(strtrim(miceToken{1}))
+                        miceList = str2num(['[' miceToken{1} ']']); %#ok<ST2NM>
+                        if ismember(mouseNum_rew, miceList)
+                            for li2 = li+1:min(li+4,length(rewLines))
+                                % Stop if we've crossed into another branch
+                                nextTrim = strtrim(rewLines{li2});
+                                if ~isempty(regexp(nextTrim,'^(elseif|else(\s|%|$)|if |end\b)','once'))
+                                    break;
+                                end
+                                ulTok = regexp(rewLines{li2},'uL_per_rew\s*=\s*([\d.]+)','tokens','once');
+                                if ~isempty(ulTok)
+                                    procData.ulPerRew = str2double(ulTok{1});
+                                    break;
+                                end
+                            end
+                            if ~isnan(procData.ulPerRew); break; end
+                        end
+                    end
+                % --- entering an else block ---
+                elseif ~isempty(regexp(strtrim(ln),'^else(\s|%|$)','once'))
+                    inElse = true;
+                % --- leaving else block on next if/elseif/end ---
+                elseif ~isempty(regexp(strtrim(ln),'^(if |elseif |end\b)','once'))
+                    inElse = false;
+                end
+                % --- capture uL_per_rew inside else block ---
+                if inElse
+                    ulTok = regexp(ln,'uL_per_rew\s*=\s*([\d.]+)','tokens','once');
+                    if ~isempty(ulTok)
+                        elseUL(end+1) = str2double(ulTok{1}); %#ok<AGROW>
+                        inElse = false;
+                    end
+                end
+            end
+            % Fallback: if all standard-rig else values agree, use that
+            if isnan(procData.ulPerRew) && ~isempty(elseUL)
+                uniUL = unique(elseUL);
+                if length(uniUL) == 1
+                    procData.ulPerRew = uniUL;
+                end
+            end
+        end
+    end
+end
+
+% Parse TmazeMoveTowerVisGuide.m for special reward scheme.
+% Identifies whether mouse is in bigRewardMice (big reward every non-crutch
+% correct trial) or bigRewardStreakMice (big reward every Nth non-crutch correct).
+% NOTE: if a mouse should be detected here, ensure it is listed in the
+% appropriate array in TmazeMoveTowerVisGuide.m (e.g. vr.bigRewardMice = [37,...]).
+if ~isempty(dataCell)
+    mouseNum_rew = dataCell{1}.info.mouse;
+    procData.specialRewardScheme = 'N/A';
+    virmenFile2 = which('TmazeMoveTowerVisGuide');
+    if ~isempty(virmenFile2)
+        fid = fopen(virmenFile2,'r');
+        if fid > 0
+            schemeLines = {};
+            tline = fgetl(fid);
+            while ischar(tline)
+                schemeLines{end+1} = tline; %#ok<AGROW>
+                tline = fgetl(fid);
+            end
+            fclose(fid);
+            bigRewMice       = [];
+            bigRewStreakMice  = [];
+            bigRewUL         = NaN;
+            bigRewInterval   = NaN;
+            for li = 1:length(schemeLines)
+                tok = regexp(schemeLines{li},'vr\.bigRewardMice\s*=\s*\[([^\]]*)\]','tokens','once');
+                if ~isempty(tok)
+                    v = str2num(['[' tok{1} ']']); %#ok<ST2NM>
+                    if ~isempty(v); bigRewMice = v; end
+                end
+                tok = regexp(schemeLines{li},'vr\.bigRewardStreakMice\s*=\s*\[([^\]]*)\]','tokens','once');
+                if ~isempty(tok)
+                    v = str2num(['[' tok{1} ']']); %#ok<ST2NM>
+                    if ~isempty(v); bigRewStreakMice = v; end
+                end
+                tok = regexp(schemeLines{li},'vr\.BigReward\s*=\s*([\d.]+)','tokens','once');
+                if ~isempty(tok); bigRewUL = str2double(tok{1}); end
+                tok = regexp(schemeLines{li},'vr\.bigRewardStreakInterval\s*=\s*([\d.]+)','tokens','once');
+                if ~isempty(tok); bigRewInterval = str2double(tok{1}); end
+            end
+            muSign = char(181);                    % µ  (U+00B5)
+            supTH  = [char(7511) char(688)];       % ᵗʰ (U+1D57 U+02B0)
+            if ismember(mouseNum_rew, bigRewMice)
+                procData.specialRewardScheme = sprintf(['%g' muSign 'L (Every Correct NC)'], bigRewUL);
+            elseif ismember(mouseNum_rew, bigRewStreakMice)
+                procData.specialRewardScheme = sprintf(['%g' muSign 'L (%g' supTH ' Correct NC)'], bigRewUL, bigRewInterval);
+            end
+        end
+    end
+end
+
+% familiarFac + novel trial stats.
+% All four fields (familiarFac, nNonFamiliar, nRewNonFamiliar, percCorrNonFamiliar)
+% are shown ONLY when the current mouse is listed in the ismember() call in
+% TmazeMoveTowerVisGuide.m. BAS locates that file automatically via which().
+% No manual maintenance required here — update only TmazeMoveTowerVisGuide.m.
+if ~isempty(dataCell) && isfield(dataCell{1},'visStim') && isfield(dataCell{1}.visStim,'isFamiliar')
+    mouseInFamiliarExp = false;  % default: not in familiar/novel experiment
+    mouseNum = dataCell{1}.info.mouse;
+
+    % --- For new sessions: familiarFac was saved directly by VirMEn ---
+    if isfield(dataCell{1}.maze,'familiarFac')
+        procData.familiarFac = dataCell{1}.maze.familiarFac;
+        mouseInFamiliarExp   = true;
+
+    % --- For old sessions: parse TmazeMoveTowerVisGuide.m to get the list ---
+    else
+        virmenFile = which('TmazeMoveTowerVisGuide');
+        if ~isempty(virmenFile)
+            fid = fopen(virmenFile,'r');
+            if fid > 0
+                allLines = {};
+                tline = fgetl(fid);
+                while ischar(tline)
+                    allLines{end+1} = tline; %#ok<AGROW>
+                    tline = fgetl(fid);
+                end
+                fclose(fid);
+                % Search for: ismember(vr.mouseNum,[...]) followed by familiarFac = X
+                for li = 1:length(allLines)-1
+                    if ~isempty(regexp(allLines{li},'ismember.*mouseNum','once')) && ...
+                       ~isempty(regexp(allLines{li+1},'familiarFac','once'))
+                        miceToken = regexp(allLines{li},'\[([^\]]*)\]','tokens','once');
+                        valToken  = regexp(allLines{li+1},'familiarFac\s*=\s*([\d.]+)','tokens','once');
+                        if ~isempty(miceToken) && ~isempty(valToken)
+                            miceList = str2num(['[' miceToken{1} ']']); %#ok<ST2NM>
+                            if ismember(mouseNum, miceList)
+                                procData.familiarFac = str2double(valToken{1});
+                                mouseInFamiliarExp   = true;
+                            end
+                        end
+                        break;
+                    end
+                end
+            end
+        end
+    end
+
+    % Novel stats — only computed when mouse is in the familiar/novel experiment
+    if mouseInFamiliarExp
+        procData.nNonFamiliar    = sum(findTrials(dataCell,'visStim.isFamiliar==0'));
+        procData.nRewNonFamiliar = sum(findTrials(dataCell,'visStim.isFamiliar==0; result.correct==1'));
+        if procData.nNonFamiliar > 0
+            procData.percCorrNonFamiliar = 100 * procData.nRewNonFamiliar / procData.nNonFamiliar;
+        else
+            procData.percCorrNonFamiliar = NaN;
+        end
+    end
+end
+

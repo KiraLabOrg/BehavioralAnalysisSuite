@@ -48,7 +48,7 @@ table.sessionTime.data = datestr(procData.sessionTimeVector,'HH:MM:SS');
 table.sessionTime.names = {'Elapsed Time'};
 
 %Initialize - DO NOT MODIFY
-table.general.data = [];
+table.general.data = {};   % cell array so it can hold both numbers and strings
 table.general.names = {};
 table.conditions.data = [];
 table.conditions.names = {};
@@ -59,11 +59,25 @@ table.special.names = {};
 
 %MODIFY THE SECTIONS BELOW
 %general
-table.general.data(size(table.general.data,1)+1,1) = procData.nRewards;
-table.general.data(size(table.general.data,1)+1,1) = procData.nTrials;
-table.general.data(size(table.general.data,1)+1,1) = procData.percCorr;
-table.general.data(size(table.general.data,1)+1,1) = procData.percLeft;
+table.general.data{end+1,1} = procData.nRewards;
+table.general.data{end+1,1} = procData.nTrials;
+table.general.data{end+1,1} = procData.percCorr;
+table.general.data{end+1,1} = procData.percLeft;
 table.general.names = {'nRewards','nTrials','Percent Correct','Percent Left Turns'};
+
+% Reward info — parsed from ViRMEn source files at analysis time
+if isfield(procData,'ulPerRew')
+    if ~isnan(procData.ulPerRew)
+        table.general.data{end+1,1} = procData.ulPerRew;
+    else
+        table.general.data{end+1,1} = 'N/A';
+    end
+    table.general.names{end+1} = 'uL/Reward';
+end
+if isfield(procData,'specialRewardScheme')
+    table.general.data{end+1,1} = procData.specialRewardScheme;
+    table.general.names{end+1}  = 'Special Reward Scheme';
+end
 
 %conditions
 numConds = length(procData.nTrialsConds);
@@ -87,7 +101,10 @@ table.timing.names = {'Trials Per Minute','Rewards Per Minute','Mean Trial Durat
     
 %special
 if isfield(procData,'catData')
-    table.general.data(size(table.general.data,1)+1,1) = procData.catData.percCat0Trials;
+    % percCat0Trials goes in the general section (and its name too)
+    table.general.data{end+1,1} = procData.catData.percCat0Trials;
+    table.general.names = [table.general.names, {'Percent Cat0'}];
+
     table.special.data(end+1,1) = procData.catData.crutch.nCorrect;
     table.special.data(end+1,1) = procData.catData.crutch.nTrials;
     table.special.data(end+1,1) = procData.catData.crutch.percCorrect;
@@ -96,13 +113,22 @@ if isfield(procData,'catData')
     table.special.data(end+1,1) = procData.catData.noCrutch.nTrials;
     table.special.data(end+1,1) = procData.catData.noCrutch.percCorrect;
 
-    table.special.data(end+1,1) = procData.streak;
+    % 'Percent Cat0' is NOT here — its data is in general, not special
+    catNames = {'nRewards Crutch', 'nTrials Crutch', 'Percent Correct Crutch', ...
+                'nRewards NoCrut', 'nTrials NoCrut', 'Percent Correct NoCrut'};
 
-    table.special.names = [table.special.names, ...
-        {'Percent Cat0', ...
-         'nRewards Crutch', 'nTrials Crutch', 'Percent Correct Crutch', ...
-         'nRewards NoCrut', 'nTrials NoCrut', 'Percent Correct NoCrut', ...
-         'Streak'}];
+    % Novel (non-familiar) trial stats — shown below Percent Correct NoCrut
+    if isfield(procData,'nRewNonFamiliar')
+        table.special.data(end+1,1) = procData.nRewNonFamiliar;
+        table.special.data(end+1,1) = procData.nNonFamiliar;
+        table.special.data(end+1,1) = procData.percCorrNonFamiliar;
+        catNames = [catNames, {'nRewards Novel', 'nTrials Novel', 'Percent Correct Novel'}];
+    end
+
+    table.special.data(end+1,1) = procData.streak;
+    catNames = [catNames, {'Streak'}];
+
+    table.special.names = [table.special.names, catNames];
 end
 
 if isfield(procData,'pairedData') %paired
@@ -185,6 +211,11 @@ if isfield(procData,'twoFac')
     % table.special.names = {'twoFac'};
     table.special.names = [table.special.names, {'twoFac'}];
 end
+
+if isfield(procData,'familiarFac')
+    table.special.data(size(table.special.data,1)+1,1) = procData.familiarFac;
+    table.special.names = [table.special.names, {'familiarFac'}];
+end
     
     % Added by VS 02/15/17
 if isfield(procData,'probCrutch')
@@ -215,5 +246,7 @@ if isfield(procData,'mazeLength')
     table.special.data(size(table.special.data,1)+1,1) = procData.mazeLength;
     table.special.names = {'Maze Length'};
 end
+
+
 
 end

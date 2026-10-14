@@ -10,7 +10,14 @@ for i=1:length(table)
    tableData{i} = table{i}.sessionTime.data;
     rowNames = table{i}.sessionTime.names;
     if ismember(2,values) %general
-        tableData{i} = cat(1,tableData{i},num2cell(table{i}.general.data));
+        if ~isempty(table{i}.general.data)
+            if isnumeric(table{i}.general.data)
+                tableData{i} = cat(1,tableData{i},num2cell(table{i}.general.data));
+            else
+                % cell array: may contain numbers and/or strings (e.g. reward scheme text)
+                tableData{i} = cat(1,tableData{i},table{i}.general.data);
+            end
+        end
         rowNames = cat(2,rowNames,table{i}.general.names);
     end
     if ismember(1,values) %special
@@ -31,7 +38,7 @@ for i=1:length(table)
 end
 
 for i=1:length(table)
-    columnWidth{i} = 101;
+    columnWidth{i} = 200;  % wide enough for longest text entry (e.g. reward scheme strings)
     if i==1
         columnNames{i} = 'All Data';
         offset = 1;
