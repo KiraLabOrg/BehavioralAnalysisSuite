@@ -62,10 +62,18 @@ table.special.names = {};
 table.general.data{end+1,1} = procData.nRewards;
 table.general.data{end+1,1} = procData.nTrials;
 table.general.data{end+1,1} = procData.percCorr;
-table.general.data{end+1,1} = procData.percLeft;
-table.general.names = {'nRewards','nTrials','Percent Correct','Percent Left Turns'};
+table.general.names = {'nRewards','nTrials','Percent Correct'};
 
-% Reward info — parsed from ViRMEn source files at analysis time
+% Percent Cat0 — inserted here so it appears above Percent Left Turns
+if isfield(procData,'catData')
+    table.general.data{end+1,1} = procData.catData.percCat0Trials;
+    table.general.names{end+1}  = 'Percent Cat0';
+end
+
+table.general.data{end+1,1} = procData.percLeft;
+table.general.names{end+1}  = 'Percent Left Turns';
+
+% Reward info — runtime values from ViRMEn session
 if isfield(procData,'ulPerRew')
     if ~isnan(procData.ulPerRew)
         table.general.data{end+1,1} = procData.ulPerRew;
@@ -101,9 +109,7 @@ table.timing.names = {'Trials Per Minute','Rewards Per Minute','Mean Trial Durat
     
 %special
 if isfield(procData,'catData')
-    % percCat0Trials goes in the general section (and its name too)
-    table.general.data{end+1,1} = procData.catData.percCat0Trials;
-    table.general.names = [table.general.names, {'Percent Cat0'}];
+    % Note: percCat0Trials is added to the general section above, before Percent Left Turns.
 
     table.special.data(end+1,1) = procData.catData.crutch.nCorrect;
     table.special.data(end+1,1) = procData.catData.crutch.nTrials;

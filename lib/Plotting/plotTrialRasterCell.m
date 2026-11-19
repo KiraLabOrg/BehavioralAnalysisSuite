@@ -61,7 +61,7 @@ familiar_exist = isfield(dataCell{1},'visStim') && isfield(dataCell{1}.visStim,'
 % (set by processDataCell.m solely for mice listed in TmazeMoveTowerVisGuide line 46)
 mouseInFamiliarExp = familiar_exist && isfield(procData,'familiarFac');
 novelColorL = [252/255   0/255 213/255];  % #FC00D5 hot magenta – L Novel
-novelColorR = [  0/255  16/255 255/255];  % #0010FF electric blue – R Novel
+novelColorR = [ 30/255 144/255 255/255];  % #1E90FF dodger blue – R Novel
 yBounds = get(gca,'ylim');
 newCellFlag = false;
 for i=1:size(dataCell,2)

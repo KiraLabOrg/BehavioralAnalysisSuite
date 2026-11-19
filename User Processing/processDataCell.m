@@ -187,122 +187,160 @@ if ~isempty(dataCell) && isfield(dataCell{1}.maze,'mazeLength')
     end
 end
 
-% Parse giveRewardKL.m to find uL per reward for this mouse.
-% First checks all explicit ismember(vr.mouseNum,[...]) blocks.
-% If the mouse is in the else/default branch, falls back to the consensus
-% else-block value across all standard rigs (rigs 1-3 all default to 7 uL).
+% Reward volume per trial (uL/Reward).
+% New sessions: read normalReward saved directly into dataCell{1}.info by
+% ViRMEn after chooseBigRewardGUI has run — these reflect what actually ran.
+% Old sessions (field absent): fall back to parsing giveRewardKL.m on disk.
 if ~isempty(dataCell)
     mouseNum_rew = dataCell{1}.info.mouse;
     procData.ulPerRew = NaN;
-    rewardFile = which('giveRewardKL');
-    if ~isempty(rewardFile)
-        fid = fopen(rewardFile,'r');
-        if fid > 0
-            rewLines = {};
-            tline = fgetl(fid);
-            while ischar(tline)
-                rewLines{end+1} = tline; %#ok<AGROW>
+    if isfield(dataCell{1}.info, 'normalReward') && ~isnan(dataCell{1}.info.normalReward)
+        % --- New sessions: use runtime value saved by ViRMEn ---
+        procData.ulPerRew = dataCell{1}.info.normalReward;
+    else
+        % --- Old sessions: parse giveRewardKL.m (rig-agnostic fallback) ---
+        % First checks all explicit ismember(vr.mouseNum,[...]) blocks.
+        % If the mouse is in the else/default branch, falls back to the
+        % consensus else-block value across all standard rigs.
+        rewardFile = which('giveRewardKL');
+        if ~isempty(rewardFile)
+            fid = fopen(rewardFile,'r');
+            if fid > 0
+                rewLines = {};
                 tline = fgetl(fid);
-            end
-            fclose(fid);
-            elseUL      = [];   % default uL values from else blocks (fallback)
-            inElse      = false;
-            for li = 1:length(rewLines)
-                ln = rewLines{li};
-                % --- explicit ismember match ---
-                if ~isempty(regexp(ln,'ismember.*mouseNum','once'))
-                    inElse = false;
-                    miceToken = regexp(ln,'\[([^\]]*)\]','tokens','once');
-                    if ~isempty(miceToken) && ~isempty(strtrim(miceToken{1}))
-                        miceList = str2num(['[' miceToken{1} ']']); %#ok<ST2NM>
-                        if ismember(mouseNum_rew, miceList)
-                            for li2 = li+1:min(li+4,length(rewLines))
-                                % Stop if we've crossed into another branch
-                                nextTrim = strtrim(rewLines{li2});
-                                if ~isempty(regexp(nextTrim,'^(elseif|else(\s|%|$)|if |end\b)','once'))
-                                    break;
-                                end
-                                ulTok = regexp(rewLines{li2},'uL_per_rew\s*=\s*([\d.]+)','tokens','once');
-                                if ~isempty(ulTok)
-                                    procData.ulPerRew = str2double(ulTok{1});
-                                    break;
-                                end
-                            end
-                            if ~isnan(procData.ulPerRew); break; end
-                        end
-                    end
-                % --- entering an else block ---
-                elseif ~isempty(regexp(strtrim(ln),'^else(\s|%|$)','once'))
-                    inElse = true;
-                % --- leaving else block on next if/elseif/end ---
-                elseif ~isempty(regexp(strtrim(ln),'^(if |elseif |end\b)','once'))
-                    inElse = false;
+                while ischar(tline)
+                    rewLines{end+1} = tline; %#ok<AGROW>
+                    tline = fgetl(fid);
                 end
-                % --- capture uL_per_rew inside else block ---
-                if inElse
-                    ulTok = regexp(ln,'uL_per_rew\s*=\s*([\d.]+)','tokens','once');
-                    if ~isempty(ulTok)
-                        elseUL(end+1) = str2double(ulTok{1}); %#ok<AGROW>
+                fclose(fid);
+                elseUL      = [];   % default uL values from else blocks (fallback)
+                inElse      = false;
+                for li = 1:length(rewLines)
+                    ln = rewLines{li};
+                    % --- explicit ismember match ---
+                    if ~isempty(regexp(ln,'ismember.*mouseNum','once'))
+                        inElse = false;
+                        miceToken = regexp(ln,'\[([^\]]*)\]','tokens','once');
+                        if ~isempty(miceToken) && ~isempty(strtrim(miceToken{1}))
+                            miceList = str2num(['[' miceToken{1} ']']); %#ok<ST2NM>
+                            if ismember(mouseNum_rew, miceList)
+                                for li2 = li+1:min(li+4,length(rewLines))
+                                    % Stop if we've crossed into another branch
+                                    nextTrim = strtrim(rewLines{li2});
+                                    if ~isempty(regexp(nextTrim,'^(elseif|else(\s|%|$)|if |end\b)','once'))
+                                        break;
+                                    end
+                                    ulTok = regexp(rewLines{li2},'uL_per_rew\s*=\s*([\d.]+)','tokens','once');
+                                    if ~isempty(ulTok)
+                                        procData.ulPerRew = str2double(ulTok{1});
+                                        break;
+                                    end
+                                end
+                                if ~isnan(procData.ulPerRew); break; end
+                            end
+                        end
+                    % --- entering an else block ---
+                    elseif ~isempty(regexp(strtrim(ln),'^else(\s|%|$)','once'))
+                        inElse = true;
+                    % --- leaving else block on next if/elseif/end ---
+                    elseif ~isempty(regexp(strtrim(ln),'^(if |elseif |end\b)','once'))
                         inElse = false;
                     end
+                    % --- capture uL_per_rew inside else block ---
+                    if inElse
+                        ulTok = regexp(ln,'uL_per_rew\s*=\s*([\d.]+)','tokens','once');
+                        if ~isempty(ulTok)
+                            elseUL(end+1) = str2double(ulTok{1}); %#ok<AGROW>
+                            inElse = false;
+                        end
+                    end
                 end
-            end
-            % Fallback: if all standard-rig else values agree, use that
-            if isnan(procData.ulPerRew) && ~isempty(elseUL)
-                uniUL = unique(elseUL);
-                if length(uniUL) == 1
-                    procData.ulPerRew = uniUL;
+                % Fallback: if all standard-rig else values agree, use that
+                if isnan(procData.ulPerRew) && ~isempty(elseUL)
+                    uniUL = unique(elseUL);
+                    if length(uniUL) == 1
+                        procData.ulPerRew = uniUL;
+                    end
                 end
             end
         end
     end
 end
 
-% Parse TmazeMoveTowerVisGuide.m for special reward scheme.
-% Identifies whether mouse is in bigRewardMice (big reward every non-crutch
-% correct trial) or bigRewardStreakMice (big reward every Nth non-crutch correct).
-% NOTE: if a mouse should be detected here, ensure it is listed in the
-% appropriate array in TmazeMoveTowerVisGuide.m (e.g. vr.bigRewardMice = [37,...]).
+% Special reward scheme display.
+% New sessions: read BigReward / streak fields saved directly into
+% dataCell{1}.info by ViRMEn — these reflect runtime values after
+% chooseBigRewardGUI, not the hardcoded source-file defaults.
+% Old sessions (fields absent): fall back to parsing TmazeMoveTowerVisGuide.m.
+% NOTE: for old sessions, if a mouse should be detected here, ensure it is
+% listed in the appropriate array in TmazeMoveTowerVisGuide.m.
 if ~isempty(dataCell)
     mouseNum_rew = dataCell{1}.info.mouse;
     procData.specialRewardScheme = 'N/A';
-    virmenFile2 = which('TmazeMoveTowerVisGuide');
-    if ~isempty(virmenFile2)
-        fid = fopen(virmenFile2,'r');
-        if fid > 0
-            schemeLines = {};
-            tline = fgetl(fid);
-            while ischar(tline)
-                schemeLines{end+1} = tline; %#ok<AGROW>
-                tline = fgetl(fid);
+    muSign = char(181);                    % µ  (U+00B5)
+    supTH  = [char(7511) char(688)];       % ᵗʰ (U+1D57 U+02B0)
+    if isfield(dataCell{1}.info, 'BigReward') && isfield(dataCell{1}.info, 'bigRewardStreakMice')
+        % --- New sessions: use runtime values saved by ViRMEn ---
+        bigRewMice       = dataCell{1}.info.bigRewardMice;
+        bigRewStreakMice = dataCell{1}.info.bigRewardStreakMice;
+        bigRewUL         = dataCell{1}.info.BigReward;
+        bigRewInterval   = dataCell{1}.info.bigRewardStreakInterval;
+        % Prefer bigRewardMode (the actual GUI-selected mode for this session)
+        % over ismember on the mouse lists (which reflect hardcoded defaults
+        % in TmazeMoveTowerVisGuide.m and ignore any GUI override).
+        if isfield(dataCell{1}.info, 'bigRewardMode') && ~isempty(dataCell{1}.info.bigRewardMode)
+            switch dataCell{1}.info.bigRewardMode
+                case 'everyNC'
+                    procData.specialRewardScheme = sprintf(['%g' muSign 'L (Every Correct NC)'], bigRewUL);
+                case 'streakNC'
+                    procData.specialRewardScheme = sprintf(['%g' muSign 'L (%g' supTH ' Correct NC)'], bigRewUL, bigRewInterval);
             end
-            fclose(fid);
-            bigRewMice       = [];
-            bigRewStreakMice  = [];
-            bigRewUL         = NaN;
-            bigRewInterval   = NaN;
-            for li = 1:length(schemeLines)
-                tok = regexp(schemeLines{li},'vr\.bigRewardMice\s*=\s*\[([^\]]*)\]','tokens','once');
-                if ~isempty(tok)
-                    v = str2num(['[' tok{1} ']']); %#ok<ST2NM>
-                    if ~isempty(v); bigRewMice = v; end
-                end
-                tok = regexp(schemeLines{li},'vr\.bigRewardStreakMice\s*=\s*\[([^\]]*)\]','tokens','once');
-                if ~isempty(tok)
-                    v = str2num(['[' tok{1} ']']); %#ok<ST2NM>
-                    if ~isempty(v); bigRewStreakMice = v; end
-                end
-                tok = regexp(schemeLines{li},'vr\.BigReward\s*=\s*([\d.]+)','tokens','once');
-                if ~isempty(tok); bigRewUL = str2double(tok{1}); end
-                tok = regexp(schemeLines{li},'vr\.bigRewardStreakInterval\s*=\s*([\d.]+)','tokens','once');
-                if ~isempty(tok); bigRewInterval = str2double(tok{1}); end
-            end
-            muSign = char(181);                    % µ  (U+00B5)
-            supTH  = [char(7511) char(688)];       % ᵗʰ (U+1D57 U+02B0)
+        else
+            % bigRewardMode not saved — fall back to mouse-list membership
             if ismember(mouseNum_rew, bigRewMice)
                 procData.specialRewardScheme = sprintf(['%g' muSign 'L (Every Correct NC)'], bigRewUL);
             elseif ismember(mouseNum_rew, bigRewStreakMice)
                 procData.specialRewardScheme = sprintf(['%g' muSign 'L (%g' supTH ' Correct NC)'], bigRewUL, bigRewInterval);
+            end
+        end
+    else
+        % --- Old sessions: parse TmazeMoveTowerVisGuide.m (source-file fallback) ---
+        virmenFile2 = which('TmazeMoveTowerVisGuide');
+        if ~isempty(virmenFile2)
+            fid = fopen(virmenFile2,'r');
+            if fid > 0
+                schemeLines = {};
+                tline = fgetl(fid);
+                while ischar(tline)
+                    schemeLines{end+1} = tline; %#ok<AGROW>
+                    tline = fgetl(fid);
+                end
+                fclose(fid);
+                bigRewMice       = [];
+                bigRewStreakMice  = [];
+                bigRewUL         = NaN;
+                bigRewInterval   = NaN;
+                for li = 1:length(schemeLines)
+                    tok = regexp(schemeLines{li},'vr\.bigRewardMice\s*=\s*\[([^\]]*)\]','tokens','once');
+                    if ~isempty(tok)
+                        v = str2num(['[' tok{1} ']']); %#ok<ST2NM>
+                        if ~isempty(v); bigRewMice = v; end
+                    end
+                    tok = regexp(schemeLines{li},'vr\.bigRewardStreakMice\s*=\s*\[([^\]]*)\]','tokens','once');
+                    if ~isempty(tok)
+                        v = str2num(['[' tok{1} ']']); %#ok<ST2NM>
+                        if ~isempty(v); bigRewStreakMice = v; end
+                    end
+                    tok = regexp(schemeLines{li},'vr\.BigReward\s*=\s*([\d.]+)','tokens','once');
+                    if ~isempty(tok); bigRewUL = str2double(tok{1}); end
+                    tok = regexp(schemeLines{li},'vr\.bigRewardStreakInterval\s*=\s*([\d.]+)','tokens','once');
+                    if ~isempty(tok); bigRewInterval = str2double(tok{1}); end
+                end
+                if ismember(mouseNum_rew, bigRewMice)
+                    procData.specialRewardScheme = sprintf(['%g' muSign 'L (Every Correct NC)'], bigRewUL);
+                elseif ismember(mouseNum_rew, bigRewStreakMice)
+                    procData.specialRewardScheme = sprintf(['%g' muSign 'L (%g' supTH ' Correct NC)'], bigRewUL, bigRewInterval);
+                end
             end
         end
     end
