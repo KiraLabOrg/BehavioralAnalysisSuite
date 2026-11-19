@@ -292,7 +292,7 @@ if ~isempty(dataCell)
             switch dataCell{1}.info.bigRewardMode
                 case 'everyNC'
                     procData.specialRewardScheme = sprintf(['%g' muSign 'L (Every Correct NC)'], bigRewUL);
-                case 'streakNC'
+                case {'streakNC','streak'}
                     procData.specialRewardScheme = sprintf(['%g' muSign 'L (%g' supTH ' Correct NC)'], bigRewUL, bigRewInterval);
             end
         else
